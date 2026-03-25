@@ -33,15 +33,14 @@ model Session {
   refreshTokenExpires DateTime?
 }
 
-// Box model: ek box configuration store karega
 model Box {
   id            String   @id @default(cuid())
   title         String
   description   String?
-  slug          String   @unique  // URL friendly name
-  status        String   @default("draft")  // draft, active
-  discountType  String?  // percentage, fixed, tiered, bulk
-  discountValue Float?   // for simple discounts
+  slug          String   @unique
+  status        String   @default("draft")
+  discountType  String?
+  discountValue Float?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -49,30 +48,28 @@ model Box {
   customFields  CustomField[]
 }
 
-// Step model: each box can have multiple steps
 model Step {
   id          String   @id @default(cuid())
   boxId       String
-  order       Int      // step order (1,2,3...)
-  title       String   // e.g., "Choose your base"
+  order       Int
+  title       String
   description String?
-  minSelect   Int      @default(1) // minimum products to select
-  maxSelect   Int      @default(1) // maximum products to select
-  productIds  String   // JSON array of product variant IDs (or product IDs)
+  minSelect   Int      @default(1)
+  maxSelect   Int      @default(1)
+  productIds  String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   box         Box      @relation(fields: [boxId], references: [id], onDelete: Cascade)
 }
 
-// CustomField model: for gift messages, file uploads, etc.
 model CustomField {
   id          String   @id @default(cuid())
   boxId       String
-  label       String   // "Gift message"
-  type        String   // text, textarea, date, file
+  label       String
+  type        String
   required    Boolean  @default(false)
-  options     String?  // JSON for select/radio
+  options     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
