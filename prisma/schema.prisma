@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+// Box model: ek box configuration store karega
+model Box {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  slug          String   @unique  // URL friendly name
+  status        String   @default("draft")  // draft, active
+  discountType  String?  // percentage, fixed, tiered, bulk
+  discountValue Float?   // for simple discounts
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  steps         Step[]
+  customFields  CustomField[]
+}
+
+// Step model: each box can have multiple steps
+model Step {
+  id          String   @id @default(cuid())
+  boxId       String
+  order       Int      // step order (1,2,3...)
+  title       String   // e.g., "Choose your base"
+  description String?
+  minSelect   Int      @default(1) // minimum products to select
+  maxSelect   Int      @default(1) // maximum products to select
+  productIds  String   // JSON array of product variant IDs (or product IDs)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  box         Box      @relation(fields: [boxId], references: [id], onDelete: Cascade)
+}
+
+// CustomField model: for gift messages, file uploads, etc.
+model CustomField {
+  id          String   @id @default(cuid())
+  boxId       String
+  label       String   // "Gift message"
+  type        String   // text, textarea, date, file
+  required    Boolean  @default(false)
+  options     String?  // JSON for select/radio
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  box         Box      @relation(fields: [boxId], references: [id], onDelete: Cascade)
+}
